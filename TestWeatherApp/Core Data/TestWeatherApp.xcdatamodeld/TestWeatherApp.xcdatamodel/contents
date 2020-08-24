@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="16119" systemVersion="19G2021" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="WeatherData" representedClassName="WeatherData" syncable="YES">
+        <attribute name="city" optional="YES" attributeType="String"/>
+        <attribute name="descript" optional="YES" attributeType="String"/>
+        <attribute name="forecastDataAvailable" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="id" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="temperature" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="wind" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="forecast" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="WeatherForecast" inverseName="parentCity" inverseEntity="WeatherForecast"/>
+    </entity>
+    <entity name="WeatherForecast" representedClassName="WeatherForecast" syncable="YES">
+        <attribute name="condition" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="dayOfWeek" optional="YES" attributeType="String"/>
+        <attribute name="temperature" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="parentCity" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="WeatherData" inverseName="forecast" inverseEntity="WeatherData"/>
+    </entity>
+    <elements>
+        <element name="WeatherData" positionX="-63" positionY="-18" width="128" height="28"/>
+        <element name="WeatherForecast" positionX="-54" positionY="-9" width="128" height="28"/>
+    </elements>
+</model>
