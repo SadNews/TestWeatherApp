@@ -11,4 +11,5 @@ import CoreData
 final class ContextSingltone {
     static let shared = ContextSingltone()
     var context: NSManagedObjectContext?
+    
 }

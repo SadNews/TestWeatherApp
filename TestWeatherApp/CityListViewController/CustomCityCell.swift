@@ -8,7 +8,7 @@
 
 import UIKit
 
-class CustomCityCell: UITableViewCell {
+final class CustomCityCell: UITableViewCell {
     @IBOutlet weak var cityLabel: UILabel!
     @IBOutlet weak var temperatureLabel: UILabel!
     @IBOutlet weak var weatherIcon: UIImageView!
@@ -18,6 +18,8 @@ class CustomCityCell: UITableViewCell {
     
     override func awakeFromNib() {
         super.awakeFromNib()
+        
     }
-    
 }
+
+

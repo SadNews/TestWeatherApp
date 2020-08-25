@@ -15,25 +15,22 @@ final class DetailsViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var temperatureLabel: UILabel!
     @IBOutlet weak var humidityLable: UILabel!
-    @IBOutlet weak var humidityValueLabel: UILabel!
-    @IBOutlet weak var descriptionLabel: UILabel!
     @IBOutlet weak var pressureLabel: UILabel!
+    @IBOutlet weak var descriptionLabel: UILabel!
+    @IBOutlet weak var humidityValueLabel: UILabel!
     @IBOutlet weak var pressureValueLabel: UILabel!
     
     private var forecastArray : [DailyWeather]?
-    private let context = ContextSingltone.shared.context
-    private let request: NSFetchRequest<DailyWeather> = DailyWeather.fetchRequest()
     
     var selectedCity : WeatherData?
     override func viewDidLoad() {
-        
         super.viewDidLoad()
         if selectedCity != nil {
             loadFetchData()
         }
         setupView()
     }
-
+    
     func setupView() {
         tableView.delegate = self
         tableView.dataSource = self
@@ -44,16 +41,20 @@ final class DetailsViewController: UIViewController {
         descriptionLabel.text = selectedCity?.weatherDescription
         cityLabel.text = selectedCity?.city
         temperatureLabel.text = String("\(selectedCity?.temperature ?? 0) C°")
-        humidityValueLabel.text = String(selectedCity?.humidity ?? 0)
-        pressureValueLabel.text = String(selectedCity?.pressure ?? 0)
+        humidityLable.text = "Влажность"
+        pressureLabel.text = "Давление"
+        humidityValueLabel.text = String("\(selectedCity!.humidity)%")
+        pressureValueLabel.text = String("\(selectedCity!.pressure) мм")
     }
     
     func loadFetchData() {
+        let context = ContextSingltone.shared.context
+        let request: NSFetchRequest<DailyWeather> = DailyWeather.fetchRequest()
         request.predicate  = NSPredicate(format: "cityId MATCHES %@", String(selectedCity!.cityId))
         forecastArray = try? context?.fetch(request)
         
     }
-
+    
 }
 extension DetailsViewController: UITableViewDelegate {
     

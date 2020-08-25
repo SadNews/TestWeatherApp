@@ -2,7 +2,7 @@
 //  WeatherData+CoreDataProperties.swift
 //  TestWeatherApp
 //
-//  Created by Андрей Ушаков on 24.08.2020.
+//  Created by Андрей Ушаков on 22.08.2020.
 //  Copyright © 2020 Андрей Ушаков. All rights reserved.
 //
 //
@@ -10,13 +10,12 @@
 import Foundation
 import CoreData
 
-
 extension WeatherData {
-
+    
     @nonobjc public class func fetchRequest() -> NSFetchRequest<WeatherData> {
         return NSFetchRequest<WeatherData>(entityName: "WeatherData")
     }
-
+    
     @NSManaged public var attribute: Int32
     @NSManaged public var city: String?
     @NSManaged public var dt: Int64
@@ -32,5 +31,5 @@ extension WeatherData {
     @NSManaged public var weatherDescription: String?
     @NSManaged public var dailyDataAvailable: Bool
     @NSManaged public var dailyWeather: DailyWeather?
-
+    
 }

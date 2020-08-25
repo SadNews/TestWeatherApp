@@ -2,7 +2,7 @@
 //  AddFor.swift
 //  TestWeatherApp
 //
-//  Created by Андрей Ушаков on 23.08.2020.
+//  Created by Андрей Ушаков on 22.08.2020.
 //  Copyright © 2020 Андрей Ушаков. All rights reserved.
 //
 
@@ -10,43 +10,62 @@ import Foundation
 import CoreData
 
 class FetchDailyWeather {
-    var context = ContextSingltone.shared.context
     var forecastArray : [DailyWeather]?
-    let forrequest: NSFetchRequest<DailyWeather> = DailyWeather.fetchRequest()
+    let context = ContextSingltone.shared.context
     
-    func fetchForecast(lon: Double, lat: Double, cityWeatherInfo: WeatherData) {
-        forrequest.predicate  = NSPredicate(format: "cityId MATCHES %@", String(cityWeatherInfo.cityId))
-               forecastArray = try? context?.fetch(forrequest)
-        var dayForecast: Int = 0
-        let qq = "https://api.openweathermap.org/data/2.5/onecall?lat=\(lat)&lon=\(lon)&exclude=current&appid=9754f1dcdd163d57f0a1b5346df28be3&units=metric&lang=ru"
+    
+    func fetchForecast(lon: Double, lat: Double, cityWeatherInfo: WeatherData, forrequest: NSFetchRequest<DailyWeather> = DailyWeather.fetchRequest()) {
+        Thread.printCurrent()
+
+        let cityPredicate = NSPredicate(format: "cityId MATCHES %@", String(cityWeatherInfo.cityId))
+        forrequest.predicate = cityPredicate
+        do {
+            forecastArray = try context!.fetch(forrequest)
+        } catch {
+            print("Error fetching data from contextForecast \(error)")
+        }
         
-        guard let url = URL(string: qq) else {return}
+        fetchData(lon: lon, lat: lat, cityWeatherInfo: cityWeatherInfo)
+    }
+    
+    func fetchData(lon: Double, lat: Double, cityWeatherInfo: WeatherData, forrequest: NSFetchRequest<DailyWeather> = DailyWeather.fetchRequest()) {
+        Thread.printCurrent()
+
+        var dayForecast: Int = 0
+        let fullurl =
+        "\(Constans.shared.dailyURL)lat=\(lat)&lon=\(lon)&exclude=current&\(Constans.shared.apiKey)\(Constans.shared.units)"
+        guard let url = URL(string: fullurl) else {return}
         URLSession.shared.dataTask(with: url) { (data, _, _) in
             guard let data = data else {return}
             do{
-                
                 let currentWeather = try JSONDecoder().decode(DailyWeatherModel.self, from: data)
+                
                 for item in currentWeather.daily {
-                    
+                    guard let forecastArr = self.forecastArray else {return}
                     var forecast: DailyWeather
-                    if cityWeatherInfo.dailyDataAvailable == false {
+                    if cityWeatherInfo.dailyDataAvailable == false || forecastArr.isEmpty {
                         forecast = DailyWeather(context: self.context!)
                     } else {
-                        forecast = self.forecastArray![dayForecast]
+                        
+                        forecast = forecastArr[dayForecast]
                     }
                     forecast.cityId = cityWeatherInfo.cityId
-                    forecast.parentCity = cityWeatherInfo
-                    forecast.temperature = item.temp.day
+                    forecast.temperature = Int32(item.temp.day)
+                    forecast.id = Int32(item.weather[0].id)
+                    forecast.dayOfWeek = self.getDayOfWeek(increaseDayBy: dayForecast + 1)
                     dayForecast = dayForecast + 1
                     
-                    //forecast.dayOfWeek = Int32(item.dt)
+                    self.saveForecastInfo()
+                    
                     if (cityWeatherInfo.dailyDataAvailable == false) {
                         self.forecastArray?.append(forecast)
                     }
+                    
                 }
+                
                 cityWeatherInfo.dailyDataAvailable = true
                 self.saveForecastInfo()
-                //self.reloadTableView()
+                
             } catch {
                 
             }
@@ -54,59 +73,26 @@ class FetchDailyWeather {
         
     }
     
-    func saveForecastInfo() {
-        do {
-            try context!.save()
-        } catch {
-            print("Error saving context \(error)")
+    func getDayOfWeek(increaseDayBy: Int) -> String {
+        let now = Date()
+        let dateFormatter = DateFormatter()
+        var dateComponents = DateComponents()
+        var dayOfWeekString = ""
+        
+        dateFormatter.dateFormat = "dd"
+        dateFormatter.dateFormat = "EEEE"
+        dateComponents.setValue(increaseDayBy, for: .day)
+        if let date = Calendar.current.date(byAdding: dateComponents, to: now) {
+            dayOfWeekString = dateFormatter.string(from: date)
         }
+        return dayOfWeekString
     }
-//
-//
-//
-//    let forecast = DailyWeather(context: self.context!)
-//
-//    let qq = "https://api.openweathermap.org/data/2.5/onecall?lat=\(lat)&lon=\(lon)&exclude=current&appid=9754f1dcdd163d57f0a1b5346df28be3"
-//    //  let fullUrl =
-//    //      ("\(Constans.shared.weatherURL)\(Constans.shared.forecastWeather)\(city)\(Constans.shared.apiKey)\(Constans.shared.units)")
-//    guard let url = URL(string: qq) else {return}
-//    URLSession.shared.dataTask(with: url) { (data, _, _) in
-//    guard let data = data else {return}
-//    do{
-//    let currentWeather = try JSONDecoder().decode(DailyWeatherModel.self, from: data)
-//    for item in currentWeather.daily {
-//    forecast.parentCity = cityWeatherInfo
-//    forecast.temperature = item.temp.day
-//    print(self.forecastArray?.count)
-//    self.forecastArray?.append(forecast)
-//    //                          //  dayForecast = dayForecast + 1
-//    //                            //forecast.dayOfWeek = Int32(item.dt)
-//
-//    }
-//    //  self.saveForecastInfo()
-//
-//
-//    //             //   print(forecast.temperature)
-//    } catch {
-//    print(44)
-//    }
-//    }.resume()
-//
-//}
-//
-//func saveForecastInfo() {
-//    do {
-//        print(12121)
-//        try context!.save()
-//    } catch {
-//        print("Error saving context \(error)")
-//    }
-//    //forecastCollectionView.reloadData()
-//}
-//
-//func ww(lon: Double, lat: Double, cityWeatherInfo: WeatherData) {
-//    forecastArray = try? context?.fetch(forrequest)
-//    print(forecastArray)
-//    fetchForecast(lon: lon, lat: lat, cityWeatherInfo: cityWeatherInfo)
-//}
+    
+    
+    func saveForecastInfo() {
+        let context = ContextSingltone.shared.context
+        try? context?.save()
+        
+    }
+    
 }

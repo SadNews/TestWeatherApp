@@ -14,7 +14,7 @@ struct Daily: Decodable {
     let temp: Temp
     let dt: Int
     let weather: [DaiylyWeather]
-
+    
 }
 
 struct DaiylyWeather: Decodable {

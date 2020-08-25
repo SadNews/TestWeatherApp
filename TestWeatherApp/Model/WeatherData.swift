@@ -10,17 +10,21 @@ import Foundation
 
 struct WeatherDataModel: Decodable {
     let name: String
+    let id: Int
     let main: Main
+    let coord: Coord
     let weather: [Weather]
-    let wind: Wind
-    let clouds: Clouds
 }
 
+struct Coord: Decodable {
+    let lon: Double
+    let lat: Double
+}
 struct Main: Decodable {
     let temp: Double
     let feelsLike: Double
-    let pressure: Double
-    let humidity: Double
+    let pressure: Int
+    let humidity: Int
     
     enum CodingKeys: String, CodingKey {
         case temp = "temp"
@@ -33,6 +37,7 @@ struct Main: Decodable {
 struct Weather: Decodable {
     let description: String
     let id: Int
+    let main: String
 }
 
 struct Wind: Decodable {
@@ -42,3 +47,4 @@ struct Wind: Decodable {
 struct Clouds: Decodable {
     let all: Double
 }
+

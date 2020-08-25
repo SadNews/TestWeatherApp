@@ -8,7 +8,7 @@
 
 import UIKit
 
-class CustomDetailsViewCell: UITableViewCell {
+final class CustomDetailsViewCell: UITableViewCell {
 
     @IBOutlet weak var dayOfWeekLabel: UILabel!
     @IBOutlet weak var temperatureIcon: UIImageView!

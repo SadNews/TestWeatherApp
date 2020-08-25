@@ -12,24 +12,31 @@ protocol AddCityDelegate {
     func userAddedANewCityName (city : String)
 }
 
-class AddNewCityViewController: UIViewController {
+final class AddNewCityViewController: UIViewController {
     var delegate : AddCityDelegate?
-        
+    
     @IBOutlet weak var searchBar: UISearchBar!
     override func awakeFromNib() {
         super.awakeFromNib()
     }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        searchBar.delegate = self
     }
+    
+    
+    func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
+        getWeather(searchBar)
+    }
+    
     @IBAction func getWeather(_ sender: Any) {
         if let cityName = searchBar.text {
             delegate?.userAddedANewCityName(city: cityName)
         }
         self.navigationController?.popViewController(animated: true)
     }
- 
+    
 }
 
 extension  AddNewCityViewController: UISearchBarDelegate {

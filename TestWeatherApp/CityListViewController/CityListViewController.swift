@@ -10,10 +10,9 @@ import UIKit
 import CoreData
 
 final class CityListViewController: UIViewController, AddCityDelegate {
-    let request: NSFetchRequest<WeatherData> = WeatherData.fetchRequest()
     @IBOutlet weak var tableView: UITableView!
+    let request: NSFetchRequest<WeatherData> = WeatherData.fetchRequest()
     var result: [WeatherData]?
-
     var refreshControl: UIRefreshControl {
         let refControl = UIRefreshControl()
         refControl.addTarget(self, action: #selector(refreshWeather(sender:)), for: .valueChanged)
@@ -21,6 +20,7 @@ final class CityListViewController: UIViewController, AddCityDelegate {
     }
     
     override func viewDidLoad() {
+        
         super.viewDidLoad()
         self.loadCityInfo()
         tableView.refreshControl = refreshControl
@@ -40,11 +40,15 @@ final class CityListViewController: UIViewController, AddCityDelegate {
             
             for cityWeather in citiesArray {
                 if let cityName = cityWeather.city {
-                    DispatchQueue.global().async {
+                    DispatchQueue.global(qos: .userInitiated).async {
+                        Thread.printCurrent()
+
                         WeatherManager.shared.getDataWith(city: cityName, isNewCity: false) { (result) in
                             let context = ContextSingltone.shared.context
                             self.result = try? context?.fetch(self.request)
                             DispatchQueue.main.async {
+                                Thread.printCurrent()
+
                                 self.tableView.reloadData()
                             }
                         }
@@ -61,7 +65,7 @@ final class CityListViewController: UIViewController, AddCityDelegate {
         tableView.dataSource = self
         tableView.register(UINib(nibName: "CityCell", bundle: nil), forCellReuseIdentifier: "customCityCell")
         tableView.rowHeight = 170
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Add", style: .plain, target: self, action: #selector(addTapped))
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "AddCity", style: .plain, target: self, action: #selector(addTapped))
         
         navigationItem.title = "Current weather"
     }
@@ -103,11 +107,9 @@ final class CityListViewController: UIViewController, AddCityDelegate {
             }
         }
     }
-  
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        guard let context = ContextSingltone.shared.context else {return 0 }
-        let result = try? context.fetch(request)
-        return result?.count ?? 0
+        return self.result?.count ?? 0
     }
     
 }
@@ -124,7 +126,7 @@ extension CityListViewController: UITableViewDataSource {
             cell.pressureLabel.text = String("Давление \(result![indexPath.row].pressure) мм")
             cell.weatherIcon.image =  UIImage(named: Constans.shared.updateWeatherIcon(condition: Int(result![indexPath.row].id)))
         }
-
+        
         return cell
     }
     
