@@ -9,21 +9,20 @@
 import Foundation
 import CoreData
 
-final class WeatherManager: NSObject {
+final class GetCurrentWeather: NSObject {
     let request = NSFetchRequest<NSFetchRequestResult>(entityName: "WeatherData")
-    private let fetchDailyWeather = FetchDailyWeather()
+    private let fetchDailyWeather = GetDailyWeather()
     private var currentWeather: WeatherDataModel?
     private var context = ContextSingltone.shared.context
-    var forecastArray : [WeatherData]?
     
-    
-    static let shared = WeatherManager()
+    static let shared = GetCurrentWeather()
     
     func getDataWith(city: String, isNewCity: Bool, completion: @escaping (Result<String>) -> Void) {
         
         if city != "" {
             
             let fullUrl =             ("\(Constans.shared.weatherURL)\(Constans.shared.currentWeather)\(city)\(Constans.shared.apiKey)\(Constans.shared.units)\(Constans.shared.weatherLang)")
+            
             guard let url = URL(string: fullUrl) else {return}
             URLSession.shared.dataTask(with: url) { (data, response, error) in
                 if error != nil {
@@ -36,58 +35,45 @@ final class WeatherManager: NSObject {
                     if isNewCity {
                         self.addNewCity(city: city)
                     } else {
-                        do {
                             let results = try self.context?.fetch(self.request)
                             self.updateWeather(city: city, results: results!)
-                        } catch {
-                            return completion(.Error(error.localizedDescription))
-                        }
                     }
                     completion(.Success(""))
                 } catch {
                     print(error.localizedDescription)
                     return completion(.Error(error.localizedDescription))
                 }
-                
             }.resume()
             
         } else {
             return completion(.Error("Неверное название города"))
         }
-        
     }
     
     func addNewCity (city: String) {
         guard let entity = NSEntityDescription.entity(forEntityName: "WeatherData", in: context!) else {return}
         let cityEntity = NSManagedObject(entity: entity, insertInto: context) as! WeatherData
         saveToDB(entity: cityEntity, city: city)
-        Thread.printCurrent()
         DispatchQueue.global(qos: .background).async {
-            Thread.printCurrent()
 
             self.fetchDailyWeather.fetchForecast(lon: (self.currentWeather?.coord.lon)!, lat: (self.currentWeather?.coord.lat)!, cityWeatherInfo: cityEntity)
         }
     }
-    
     
     func updateWeather (city: String, results: [Any]) {
         for result in results as! [WeatherData] {
             let cityResult = result.value(forKey: "city") as? String
             if cityResult == city {
                 saveToDB(entity: result, city: city)
-                forecastArray?.append(result)
-                Thread.printCurrent()
-
-                DispatchQueue.global(qos: .background).sync {
-                    Thread.printCurrent()
+                DispatchQueue.global(qos: .background).async {
 
                     self.fetchDailyWeather.fetchForecast(lon: (self.currentWeather?.coord.lon)!, lat: (self.currentWeather?.coord.lat)!, cityWeatherInfo: result)
                 }
                 
             }
         }
-        
     }
+    
     func saveToDB(entity: NSManagedObject, city: String) {
         
         entity.setValue(city, forKey: "city")
@@ -115,8 +101,3 @@ extension String {
     }
 }
 
-extension Thread {
-    class func printCurrent() {
-        print("\r⚡️: \(Thread.current)\r" + ": \(OperationQueue.current?.underlyingQueue?.label ?? "None")\r")
-    }
-}

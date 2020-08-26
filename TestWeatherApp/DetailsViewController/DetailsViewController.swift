@@ -21,13 +21,12 @@ final class DetailsViewController: UIViewController {
     @IBOutlet weak var pressureValueLabel: UILabel!
     
     private var forecastArray : [DailyWeather]?
-    
     var selectedCity : WeatherData?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        if selectedCity != nil {
             loadFetchData()
-        }
+ 
         setupView()
     }
     
@@ -51,8 +50,18 @@ final class DetailsViewController: UIViewController {
         let context = ContextSingltone.shared.context
         let request: NSFetchRequest<DailyWeather> = DailyWeather.fetchRequest()
         request.predicate  = NSPredicate(format: "cityId MATCHES %@", String(selectedCity!.cityId))
-        forecastArray = try? context?.fetch(request)
+        do {
+            forecastArray = try context!.fetch(request)
+            reloadData()
+        } catch {
+            
+        }
         
+    }
+    func reloadData() {
+        DispatchQueue.main.async {
+            self.tableView.reloadData()
+        }
     }
     
 }
@@ -69,7 +78,7 @@ extension DetailsViewController: UITableViewDataSource {
         let cell = tableView.dequeueReusableCell(withIdentifier: "CustomDetailsViewCell", for: indexPath) as! CustomDetailsViewCell
         cell.dayOfWeekLabel.text = forecastArray![indexPath.row].dayOfWeek
         cell.temperatureLabel.text = String("\(forecastArray![indexPath.row].temperature)°")
-        cell.temperatureIcon.image =  UIImage(named: Constans.shared.updateWeatherIcon(condition: Int(forecastArray![indexPath.row].id)))
+        cell.temperatureIcon.image =  UIImage(named: Constans.shared.updateWeatherIcon(condition:                                            Int(forecastArray![indexPath.row].id)))
         return cell
     }
     

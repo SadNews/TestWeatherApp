@@ -9,13 +9,11 @@
 import Foundation
 import CoreData
 
-class FetchDailyWeather {
+class GetDailyWeather {
     var forecastArray : [DailyWeather]?
     let context = ContextSingltone.shared.context
     
-    
     func fetchForecast(lon: Double, lat: Double, cityWeatherInfo: WeatherData, forrequest: NSFetchRequest<DailyWeather> = DailyWeather.fetchRequest()) {
-        Thread.printCurrent()
 
         let cityPredicate = NSPredicate(format: "cityId MATCHES %@", String(cityWeatherInfo.cityId))
         forrequest.predicate = cityPredicate
@@ -28,8 +26,7 @@ class FetchDailyWeather {
         fetchData(lon: lon, lat: lat, cityWeatherInfo: cityWeatherInfo)
     }
     
-    func fetchData(lon: Double, lat: Double, cityWeatherInfo: WeatherData, forrequest: NSFetchRequest<DailyWeather> = DailyWeather.fetchRequest()) {
-        Thread.printCurrent()
+    func fetchData(lon: Double, lat: Double, cityWeatherInfo: WeatherData) {
 
         var dayForecast: Int = 0
         let fullurl =
@@ -39,8 +36,9 @@ class FetchDailyWeather {
             guard let data = data else {return}
             do{
                 let currentWeather = try JSONDecoder().decode(DailyWeatherModel.self, from: data)
-                
+
                 for item in currentWeather.daily {
+                   
                     guard let forecastArr = self.forecastArray else {return}
                     var forecast: DailyWeather
                     if cityWeatherInfo.dailyDataAvailable == false || forecastArr.isEmpty {
@@ -54,18 +52,11 @@ class FetchDailyWeather {
                     forecast.id = Int32(item.weather[0].id)
                     forecast.dayOfWeek = self.getDayOfWeek(increaseDayBy: dayForecast + 1)
                     dayForecast = dayForecast + 1
-                    
-                    self.saveForecastInfo()
-                    
-                    if (cityWeatherInfo.dailyDataAvailable == false) {
-                        self.forecastArray?.append(forecast)
-                    }
-                    
+                    self.forecastArray?.append(forecast)
                 }
                 
                 cityWeatherInfo.dailyDataAvailable = true
                 self.saveForecastInfo()
-                
             } catch {
                 
             }

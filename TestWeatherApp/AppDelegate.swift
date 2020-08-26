@@ -22,7 +22,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         window?.rootViewController = nav
         window?.makeKeyAndVisible()
         saveContext()
-        print("Documents Directory: ", FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last ?? "Not Found!")
 
         return true
     }

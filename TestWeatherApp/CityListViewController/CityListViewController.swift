@@ -11,6 +11,7 @@ import CoreData
 
 final class CityListViewController: UIViewController, AddCityDelegate {
     @IBOutlet weak var tableView: UITableView!
+    let context = ContextSingltone.shared.context
     let request: NSFetchRequest<WeatherData> = WeatherData.fetchRequest()
     var result: [WeatherData]?
     var refreshControl: UIRefreshControl {
@@ -22,41 +23,47 @@ final class CityListViewController: UIViewController, AddCityDelegate {
     override func viewDidLoad() {
         
         super.viewDidLoad()
-        self.loadCityInfo()
+        loadCityInfo(city: "", isNewCity: false)
         tableView.refreshControl = refreshControl
         setupView()
     }
     
     @objc func refreshWeather(sender: UIRefreshControl) {
-        loadCityInfo()
+        loadCityInfo(city: "", isNewCity: false)
         sender.endRefreshing()
     }
     
-    func loadCityInfo() {
-        
-        let context = ContextSingltone.shared.context
-        do {
-            guard let citiesArray = try context?.fetch(request) else {return}
-            
-            for cityWeather in citiesArray {
-                if let cityName = cityWeather.city {
-                    DispatchQueue.global(qos: .userInitiated).async {
-                        Thread.printCurrent()
+    func loadCityInfo(city: String, isNewCity: Bool) {
+        if isNewCity {
+            fetchWeather(city: city, isNewCity: isNewCity)
+        } else {
+                let context = ContextSingltone.shared.context
+                guard let citiesArray = try? context?.fetch(request) else {return}
+                for cityWeather in citiesArray {
+                    if let cityName = cityWeather.city {
+                        fetchWeather(city: cityName, isNewCity: false)
+                    }
+                }
+        }
+    }
 
-                        WeatherManager.shared.getDataWith(city: cityName, isNewCity: false) { (result) in
-                            let context = ContextSingltone.shared.context
-                            self.result = try? context?.fetch(self.request)
-                            DispatchQueue.main.async {
-                                Thread.printCurrent()
-
-                                self.tableView.reloadData()
-                            }
-                        }
+    func fetchWeather(city: String, isNewCity: Bool) {
+        DispatchQueue.global().async {
+            GetCurrentWeather.shared.getDataWith(city: city, isNewCity: isNewCity) { result in
+                switch result {
+                case .Success( _):
+                    let context = ContextSingltone.shared.context
+                    self.result = try? context?.fetch(self.request)
+                    DispatchQueue.main.async {
+                        self.tableView.reloadData()
+                    }
+                    
+                case .Error(let message):
+                    DispatchQueue.main.async {
+                        self.processErrors(errorMessage: message)
                     }
                 }
             }
-        } catch {
-            print("Error fetching data from context \(error)")
         }
     }
     
@@ -88,25 +95,6 @@ final class CityListViewController: UIViewController, AddCityDelegate {
         fetchWeather(city: city, isNewCity: true)
     }
     
-    func fetchWeather(city: String, isNewCity: Bool) {
-        DispatchQueue.global().async {
-            WeatherManager.shared.getDataWith(city: city, isNewCity: isNewCity) { result in
-                switch result {
-                case .Success( _):
-                    let context = ContextSingltone.shared.context
-                    self.result = try? context?.fetch(self.request)
-                    DispatchQueue.main.async {
-                        self.tableView.reloadData()
-                        
-                    }
-                case .Error(let message):
-                    DispatchQueue.main.async {
-                        self.processErrors(errorMessage: message)
-                    }
-                }
-            }
-        }
-    }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return self.result?.count ?? 0

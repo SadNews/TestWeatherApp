@@ -26,21 +26,27 @@ final class AddNewCityViewController: UIViewController {
     }
     
     
-    func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
-        getWeather(searchBar)
+    func searchBarResultsListButtonClicked(_ searchBar: UISearchBar) {
+        getNewCityData()
+        
     }
     
-    @IBAction func getWeather(_ sender: Any) {
+    
+    @IBAction func getWeather(_ sender: UIButton) {
+        getNewCityData()
+    }
+    
+    func getNewCityData() {
         if let cityName = searchBar.text {
             delegate?.userAddedANewCityName(city: cityName)
         }
         self.navigationController?.popViewController(animated: true)
     }
-    
 }
 
 extension  AddNewCityViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        getNewCityData()
         DispatchQueue.main.async {
             searchBar.resignFirstResponder()
         }
