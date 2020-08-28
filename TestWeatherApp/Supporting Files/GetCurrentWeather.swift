@@ -69,7 +69,6 @@ final class GetCurrentWeather: NSObject {
 
                     self.fetchDailyWeather.fetchForecast(lon: (self.currentWeather?.coord.lon)!, lat: (self.currentWeather?.coord.lat)!, cityWeatherInfo: result)
                 }
-                
             }
         }
     }

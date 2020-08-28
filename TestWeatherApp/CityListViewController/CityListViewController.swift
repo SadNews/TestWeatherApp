@@ -21,7 +21,6 @@ final class CityListViewController: UIViewController, AddCityDelegate {
     }
     
     override func viewDidLoad() {
-        
         super.viewDidLoad()
         loadCityInfo(city: "", isNewCity: false)
         tableView.refreshControl = refreshControl
@@ -77,6 +76,10 @@ final class CityListViewController: UIViewController, AddCityDelegate {
         navigationItem.title = "Current weather"
     }
     
+    func userAddedANewCityName(city: String) {
+        fetchWeather(city: city, isNewCity: true)
+    }
+    
     @objc func addTapped() {
         let viewController = AddNewCityViewController(nibName: "AddNewCity", bundle: nil)
         viewController.delegate = self
@@ -91,18 +94,13 @@ final class CityListViewController: UIViewController, AddCityDelegate {
         self.present(myAlert, animated: true, completion: nil)
     }
     
-    func userAddedANewCityName(city: String) {
-        fetchWeather(city: city, isNewCity: true)
-    }
-    
+}
+
+extension CityListViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return self.result?.count ?? 0
     }
-    
-}
-
-extension CityListViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "customCityCell", for: indexPath) as! CustomCityCell

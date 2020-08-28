@@ -25,12 +25,10 @@ final class AddNewCityViewController: UIViewController {
         searchBar.delegate = self
     }
     
-    
     func searchBarResultsListButtonClicked(_ searchBar: UISearchBar) {
         getNewCityData()
         
     }
-    
     
     @IBAction func getWeather(_ sender: UIButton) {
         getNewCityData()
