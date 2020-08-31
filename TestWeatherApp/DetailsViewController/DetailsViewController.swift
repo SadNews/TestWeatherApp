@@ -25,7 +25,8 @@ final class DetailsViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        loadFetchData()
+            loadFetchData()
+ 
         setupView()
     }
     
@@ -55,8 +56,8 @@ final class DetailsViewController: UIViewController {
         } catch {
             
         }
+        
     }
-    
     func reloadData() {
         DispatchQueue.main.async {
             self.tableView.reloadData()
@@ -80,4 +81,5 @@ extension DetailsViewController: UITableViewDataSource {
         cell.temperatureIcon.image =  UIImage(named: Constans.shared.updateWeatherIcon(condition:                                            Int(forecastArray![indexPath.row].id)))
         return cell
     }
+    
 }

@@ -11,7 +11,7 @@ import CoreData
 
 final class CityListViewController: UIViewController, AddCityDelegate {
     @IBOutlet weak var tableView: UITableView!
-    let context = ContextSingltone.shared.context
+    let launchedBefore = UserDefaults.standard.bool(forKey: "launchedBefore")
     let request: NSFetchRequest<WeatherData> = WeatherData.fetchRequest()
     var result: [WeatherData]?
     var refreshControl: UIRefreshControl {
@@ -22,7 +22,12 @@ final class CityListViewController: UIViewController, AddCityDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        loadCityInfo(city: "", isNewCity: false)
+        if launchedBefore  {
+            loadCityInfo(city: "", isNewCity: false)
+        } else {
+            loadCityInfo(city: "Moscow", isNewCity: true)
+            UserDefaults.standard.set(true, forKey: "launchedBefore")
+        }
         tableView.refreshControl = refreshControl
         setupView()
     }
@@ -36,16 +41,16 @@ final class CityListViewController: UIViewController, AddCityDelegate {
         if isNewCity {
             fetchWeather(city: city, isNewCity: isNewCity)
         } else {
-                let context = ContextSingltone.shared.context
-                guard let citiesArray = try? context?.fetch(request) else {return}
-                for cityWeather in citiesArray {
-                    if let cityName = cityWeather.city {
-                        fetchWeather(city: cityName, isNewCity: false)
-                    }
+            let context = ContextSingltone.shared.context
+            guard let citiesArray = try? context?.fetch(request) else {return}
+            for cityWeather in citiesArray {
+                if let cityName = cityWeather.city {
+                    fetchWeather(city: cityName, isNewCity: false)
                 }
+            }
         }
     }
-
+    
     func fetchWeather(city: String, isNewCity: Bool) {
         DispatchQueue.global().async {
             GetCurrentWeather.shared.getDataWith(city: city, isNewCity: isNewCity) { result in
@@ -76,10 +81,6 @@ final class CityListViewController: UIViewController, AddCityDelegate {
         navigationItem.title = "Current weather"
     }
     
-    func userAddedANewCityName(city: String) {
-        fetchWeather(city: city, isNewCity: true)
-    }
-    
     @objc func addTapped() {
         let viewController = AddNewCityViewController(nibName: "AddNewCity", bundle: nil)
         viewController.delegate = self
@@ -94,13 +95,36 @@ final class CityListViewController: UIViewController, AddCityDelegate {
         self.present(myAlert, animated: true, completion: nil)
     }
     
-}
-
-extension CityListViewController: UITableViewDataSource {
+    func userAddedANewCityName(city: String) {
+        fetchWeather(city: city, isNewCity: true)
+    }
+    
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return self.result?.count ?? 0
     }
+    
+    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool
+    {
+        return true
+    }
+    
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath)
+    {
+        if editingStyle == .delete
+        {
+            let context = ContextSingltone.shared.context
+            let city = result?[indexPath.row].cityId
+            context?.delete((result?[indexPath.row])!)
+            try? context?.save()
+            result?.remove(at: indexPath.row)
+            DeleteFromDB.deleteFromDB(city: Int(city!))
+            self.tableView.reloadData()
+        }
+    }
+}
+
+extension CityListViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "customCityCell", for: indexPath) as! CustomCityCell

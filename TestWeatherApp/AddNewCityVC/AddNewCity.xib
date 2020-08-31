@@ -9,7 +9,7 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="AddNewCityViewController" customModule="TestWeatherApp" customModuleProvider="target">
             <connections>
-                <outlet property="searchBar" destination="44s-d5-roI" id="dMi-cC-1J5"/>
+                <outlet property="tableView" destination="G88-ZJ-cX7" id="YjZ-Dg-Oj0"/>
                 <outlet property="view" destination="iN0-l3-epB" id="fmT-Nc-uQy"/>
             </connections>
         </placeholder>
@@ -24,29 +24,27 @@
                         <constraint firstAttribute="height" constant="44" id="5QU-3s-03a"/>
                     </constraints>
                     <textInputTraits key="textInputTraits"/>
-                </searchBar>
-                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3f6-id-s5C">
-                    <rect key="frame" x="150.5" y="430" width="113" height="36"/>
-                    <color key="backgroundColor" systemColor="linkColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                    <fontDescription key="fontDescription" type="system" pointSize="20"/>
-                    <state key="normal" title="Add new city">
-                        <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                    </state>
                     <connections>
-                        <action selector="getWeather:" destination="-1" eventType="touchUpInside" id="QH4-9n-bDI"/>
+                        <outlet property="delegate" destination="-1" id="VPS-p5-NAY"/>
                     </connections>
-                </button>
+                </searchBar>
+                <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="G88-ZJ-cX7">
+                    <rect key="frame" x="0.0" y="103" width="414" height="759"/>
+                    <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                </tableView>
             </subviews>
             <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
             <constraints>
-                <constraint firstItem="3f6-id-s5C" firstAttribute="centerY" secondItem="iN0-l3-epB" secondAttribute="centerY" id="61i-5s-Elb"/>
-                <constraint firstItem="44s-d5-roI" firstAttribute="centerX" secondItem="iN0-l3-epB" secondAttribute="centerX" id="AOt-o8-KcL"/>
-                <constraint firstItem="44s-d5-roI" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" id="QCd-tq-zEd"/>
-                <constraint firstItem="44s-d5-roI" firstAttribute="centerX" secondItem="3f6-id-s5C" secondAttribute="centerX" id="cSS-ba-qE3"/>
-                <constraint firstItem="44s-d5-roI" firstAttribute="top" secondItem="vUN-kp-3ea" secondAttribute="top" constant="15" id="viy-AK-66R"/>
+                <constraint firstItem="G88-ZJ-cX7" firstAttribute="trailing" secondItem="vUN-kp-3ea" secondAttribute="trailing" id="5uE-Kd-tY6"/>
+                <constraint firstItem="44s-d5-roI" firstAttribute="trailing" secondItem="G88-ZJ-cX7" secondAttribute="trailing" id="9Po-i9-ECi"/>
+                <constraint firstItem="44s-d5-roI" firstAttribute="top" secondItem="vUN-kp-3ea" secondAttribute="top" constant="15" id="GDp-qb-b7S"/>
+                <constraint firstItem="44s-d5-roI" firstAttribute="leading" secondItem="G88-ZJ-cX7" secondAttribute="leading" id="WeY-YG-ueW"/>
+                <constraint firstItem="G88-ZJ-cX7" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" id="aw5-zd-N7z"/>
+                <constraint firstItem="G88-ZJ-cX7" firstAttribute="top" secondItem="44s-d5-roI" secondAttribute="bottom" id="phF-dO-6R2"/>
+                <constraint firstItem="G88-ZJ-cX7" firstAttribute="bottom" secondItem="vUN-kp-3ea" secondAttribute="bottom" id="wux-qZ-mzY"/>
             </constraints>
             <viewLayoutGuide key="safeArea" id="vUN-kp-3ea"/>
-            <point key="canvasLocation" x="139" y="137"/>
+            <point key="canvasLocation" x="137.68115942028987" y="136.60714285714286"/>
         </view>
     </objects>
 </document>

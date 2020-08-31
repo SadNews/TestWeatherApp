@@ -20,9 +20,7 @@ final class GetCurrentWeather: NSObject {
     func getDataWith(city: String, isNewCity: Bool, completion: @escaping (Result<String>) -> Void) {
         
         if city != "" {
-            
-            let fullUrl =             ("\(Constans.shared.weatherURL)\(Constans.shared.currentWeather)\(city)\(Constans.shared.apiKey)\(Constans.shared.units)\(Constans.shared.weatherLang)")
-            
+            let fullUrl =             ("\(Constans.shared.weatherURL)\(Constans.shared.currentWeather)\(convertToEnglish(city: city))\(Constans.shared.apiKey)\(Constans.shared.units)\(Constans.shared.weatherLang)")
             guard let url = URL(string: fullUrl) else {return}
             URLSession.shared.dataTask(with: url) { (data, response, error) in
                 if error != nil {
@@ -69,13 +67,14 @@ final class GetCurrentWeather: NSObject {
 
                     self.fetchDailyWeather.fetchForecast(lon: (self.currentWeather?.coord.lon)!, lat: (self.currentWeather?.coord.lat)!, cityWeatherInfo: result)
                 }
+                
             }
         }
     }
     
     func saveToDB(entity: NSManagedObject, city: String) {
         
-        entity.setValue(city, forKey: "city")
+        entity.setValue(currentWeather?.name, forKey: "city")
         entity.setValue(currentWeather?.weather[0].description.capitalizingFirstLetter(), forKey: "weatherDescription")
         entity.setValue(currentWeather?.id, forKey: "cityId")
         entity.setValue(currentWeather?.coord.lat, forKey: "lat")
@@ -86,6 +85,11 @@ final class GetCurrentWeather: NSObject {
         entity.setValue(currentWeather?.main.temp, forKey: "temperature")
         entity.setValue(currentWeather?.weather[0].id, forKey: "id")
         try? context?.save()
+    }
+    
+    func convertToEnglish(city: String) -> String{
+        let urlString = city.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)
+        return urlString!
     }
 }
 
