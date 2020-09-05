@@ -11,14 +11,12 @@ import CoreData
 
 final class GetCurrentWeather: NSObject {
     let request = NSFetchRequest<NSFetchRequestResult>(entityName: "WeatherData")
-    private let fetchDailyWeather = GetDailyWeather()
-    private var currentWeather: WeatherDataModel?
-    private var context = ContextSingltone.shared.context
-    
+    let fetchDailyWeather = GetDailyWeather()
+    var currentWeather: WeatherDataModel?
+    var context = ContextSingltone.shared.context
     static let shared = GetCurrentWeather()
     
     func getDataWith(city: String, isNewCity: Bool, completion: @escaping (Result<String>) -> Void) {
-        
         if city != "" {
             let fullUrl =             ("\(Constans.shared.weatherURL)\(Constans.shared.currentWeather)\(convertToEnglish(city: city))\(Constans.shared.apiKey)\(Constans.shared.units)\(Constans.shared.weatherLang)")
             guard let url = URL(string: fullUrl) else {return}
@@ -33,8 +31,8 @@ final class GetCurrentWeather: NSObject {
                     if isNewCity {
                         self.addNewCity(city: city)
                     } else {
-                            let results = try self.context?.fetch(self.request)
-                            self.updateWeather(city: city, results: results!)
+                        let results = try self.context?.fetch(self.request)
+                        self.updateWeather(city: city, results: results!)
                     }
                     completion(.Success(""))
                 } catch {
@@ -42,65 +40,9 @@ final class GetCurrentWeather: NSObject {
                     return completion(.Error(error.localizedDescription))
                 }
             }.resume()
-            
         } else {
             return completion(.Error("Неверное название города"))
         }
-    }
-    
-    func addNewCity (city: String) {
-        guard let entity = NSEntityDescription.entity(forEntityName: "WeatherData", in: context!) else {return}
-        let cityEntity = NSManagedObject(entity: entity, insertInto: context) as! WeatherData
-        saveToDB(entity: cityEntity, city: city)
-        DispatchQueue.global(qos: .background).async {
-
-            self.fetchDailyWeather.fetchForecast(lon: (self.currentWeather?.coord.lon)!, lat: (self.currentWeather?.coord.lat)!, cityWeatherInfo: cityEntity)
-        }
-    }
-    
-    func updateWeather (city: String, results: [Any]) {
-        for result in results as! [WeatherData] {
-            let cityResult = result.value(forKey: "city") as? String
-            if cityResult == city {
-                saveToDB(entity: result, city: city)
-                DispatchQueue.global(qos: .background).async {
-
-                    self.fetchDailyWeather.fetchForecast(lon: (self.currentWeather?.coord.lon)!, lat: (self.currentWeather?.coord.lat)!, cityWeatherInfo: result)
-                }
-                
-            }
-        }
-    }
-    
-    func saveToDB(entity: NSManagedObject, city: String) {
-        
-        entity.setValue(currentWeather?.name, forKey: "city")
-        entity.setValue(currentWeather?.weather[0].description.capitalizingFirstLetter(), forKey: "weatherDescription")
-        entity.setValue(currentWeather?.id, forKey: "cityId")
-        entity.setValue(currentWeather?.coord.lat, forKey: "lat")
-        entity.setValue(currentWeather?.coord.lon, forKey: "lon")
-        entity.setValue(currentWeather?.main.humidity, forKey: "humidity")
-        entity.setValue(currentWeather?.main.feelsLike, forKey: "feelsLike")
-        entity.setValue(currentWeather?.main.pressure, forKey: "pressure")
-        entity.setValue(currentWeather?.main.temp, forKey: "temperature")
-        entity.setValue(currentWeather?.weather[0].id, forKey: "id")
-        try? context?.save()
-    }
-    
-    func convertToEnglish(city: String) -> String{
-        let urlString = city.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)
-        return urlString!
-    }
-}
-
-enum Result<T> {
-    case Success(T)
-    case Error(String)
-}
-
-extension String {
-    func capitalizingFirstLetter() -> String {
-        return prefix(1).capitalized + dropFirst()
     }
 }
 
