@@ -96,11 +96,11 @@
 		1105689424EDD2A100477C52 /* TestWeatherApp */ = {
 			isa = PBXGroup;
 			children = (
+				1105689524EDD2A100477C52 /* AppDelegate.swift */,
+				11F8D4E424EFD91A000A71E2 /* Model */,
 				110568B824EDDDF700477C52 /* Core Data */,
 				110568B924EDE02000477C52 /* Supporting Files */,
 				11F8D4DF24EFBE9B000A71E2 /* CityListViewController */,
-				11F8D4E424EFD91A000A71E2 /* Model */,
-				1105689524EDD2A100477C52 /* AppDelegate.swift */,
 				11F8D56224F3A26D000A71E2 /* DetailsViewController */,
 				11F8D4E524EFDC78000A71E2 /* AddNewCityVC */,
 			);
