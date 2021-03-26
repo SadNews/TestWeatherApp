@@ -10,7 +10,10 @@ import UIKit
 import CoreData
 
 final class CityListViewController: UIViewController, AddCityDelegate {
+    
     @IBOutlet weak var tableView: UITableView!
+    
+    let getCurrentWeather = GetCurrentWeather()
     let launchedBefore = UserDefaults.standard.bool(forKey: "launchedBefore")
     let request: NSFetchRequest<WeatherData> = WeatherData.fetchRequest()
     var result: [WeatherData]?
@@ -22,14 +25,7 @@ final class CityListViewController: UIViewController, AddCityDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        if launchedBefore  {
-            loadCityInfo(city: "", isNewCity: false)
-        } else {
-            loadCityInfo(city: "Moscow", isNewCity: true)
-            UserDefaults.standard.set(true, forKey: "launchedBefore")
-        }
-        tableView.refreshControl = refreshControl
-        setupView()
+        setup()
     }
     
     @objc func refreshWeather(sender: UIRefreshControl) {
@@ -71,13 +67,20 @@ final class CityListViewController: UIViewController, AddCityDelegate {
         }
     }
     
-    func setupView() {
+    private func setup() {
+        if launchedBefore  {
+            loadCityInfo(city: "", isNewCity: false)
+        } else {
+            loadCityInfo(city: "Moscow", isNewCity: true)
+            loadCityInfo(city: "Saint Petersburg", isNewCity: true)
+            UserDefaults.standard.set(true, forKey: "launchedBefore")
+        }
+        tableView.refreshControl = refreshControl
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(UINib(nibName: "CityCell", bundle: nil), forCellReuseIdentifier: "customCityCell")
-        tableView.rowHeight = 170
+        tableView.rowHeight = 100
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "AddCity", style: .plain, target: self, action: #selector(addTapped))
-        
         navigationItem.title = "Current weather"
     }
     
@@ -98,21 +101,47 @@ final class CityListViewController: UIViewController, AddCityDelegate {
     func userAddedANewCityName(city: String) {
         fetchWeather(city: city, isNewCity: true)
     }
+}
+
+extension CityListViewController: UITableViewDataSource {
     
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "customCityCell", for: indexPath) as! CustomCityCell
+        guard let result = result else {return cell}
+        cell.cityLabel.text = result[indexPath.row].city
+        cell.tempLabel.text = String("\(result[indexPath.row].temperature)°")
+        cell.weatherBackgroundImage.loadGif(name: Constans.shared.updateWeatherIcon(condition: Int(result[indexPath.row].id)))
+        
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let context = ContextSingltone.shared.context
+        let result = try? context?.fetch(request)
+        if indexPath.row == 0 {
+            let viewController = DetailsViewController(nibName: "DetailsView", bundle: nil)
+            viewController.selectedCity = result?[indexPath.row]
+            self.navigationController?.pushViewController(viewController, animated: true)
+        } else {
+            let viewController = ForecastViewController()
+            viewController.selectedCity = result?[indexPath.row]
+            self.navigationController?.pushViewController(viewController, animated: true)
+        }
+    }
+}
+
+extension CityListViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return self.result?.count ?? 0
     }
     
-    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool
-    {
+    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         return true
     }
     
-    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath)
-    {
-        if editingStyle == .delete
-        {
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
             let context = ContextSingltone.shared.context
             let city = result?[indexPath.row].cityId
             context?.delete((result?[indexPath.row])!)
@@ -122,35 +151,4 @@ final class CityListViewController: UIViewController, AddCityDelegate {
             self.tableView.reloadData()
         }
     }
-}
-
-extension CityListViewController: UITableViewDataSource {
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "customCityCell", for: indexPath) as! CustomCityCell
-        if self.result != nil {
-            cell.cityLabel.text = result![indexPath.row].city
-            cell.temperatureLabel.text = String("Температура \(result![indexPath.row].temperature)°")
-            cell.feelsLikeLabel.text = String("Ощущается как \(result![indexPath.row].feelsLike)°")
-            cell.humidityLabel.text = String("Влажность \(result![indexPath.row].humidity)%")
-            cell.pressureLabel.text = String("Давление \(result![indexPath.row].pressure) мм")
-            cell.weatherIcon.image =  UIImage(named: Constans.shared.updateWeatherIcon(condition: Int(result![indexPath.row].id)))
-        }
-        
-        return cell
-    }
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let viewController = DetailsViewController(nibName: "DetailsView", bundle: nil)
-        if let indexPath = tableView.indexPathForSelectedRow {
-            let context = ContextSingltone.shared.context
-            let result = try? context?.fetch(request)
-            viewController.selectedCity = result?[indexPath.row]
-        }
-        self.navigationController?.pushViewController(viewController, animated: true)
-    }
-}
-
-extension CityListViewController: UITableViewDelegate {
-    
 }

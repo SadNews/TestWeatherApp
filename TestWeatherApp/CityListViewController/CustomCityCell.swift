@@ -10,15 +10,12 @@ import UIKit
 
 final class CustomCityCell: UITableViewCell {
     @IBOutlet weak var cityLabel: UILabel!
-    @IBOutlet weak var temperatureLabel: UILabel!
-    @IBOutlet weak var weatherIcon: UIImageView!
-    @IBOutlet weak var feelsLikeLabel: UILabel!
-    @IBOutlet weak var pressureLabel: UILabel!
-    @IBOutlet weak var humidityLabel: UILabel!
+    @IBOutlet weak var weatherBackgroundImage: UIImageView!
+    @IBOutlet weak var tempLabel: UILabel!
+    
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        
     }
 }
 
